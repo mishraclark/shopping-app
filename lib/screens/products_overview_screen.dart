@@ -23,17 +23,21 @@ class ProductsOverviewScreen extends StatefulWidget {
 class _ProductsOverviewScreenState extends State<ProductsOverviewScreen> {
   var _showFavoritesOnly = false;
   var _isInit = true;
-  // var _isLoading = false;
+  var _isLoading = false;
+
+  Future<void> _refreshproducts(BuildContext context) async {
+    await Provider.of<Products>(context, listen: false).fetchAndSetProducts();
+  }
 
   @override
   void didChangeDependencies() {
     if (_isInit) {
       setState(() {
-        // _isLoading = true;
+        _isLoading = true;
       });
       Provider.of<Products>(context).fetchAndSetProducts().then((_) {
         setState(() {
-          // _isLoading = false;
+          _isLoading = false;
         });
       });
     }
@@ -89,12 +93,13 @@ class _ProductsOverviewScreenState extends State<ProductsOverviewScreen> {
         ],
       ),
       drawer: AppDrawer(),
-      body:
-          // (_isLoading)
-          //     ? Center(
-          //         child: CircularProgressIndicator(),
-          //       ) :
-          ProductsGrid(_showFavoritesOnly),
+      body: _isLoading
+          ? Center(
+              child: CircularProgressIndicator(),
+            )
+          : RefreshIndicator(
+              onRefresh: () => _refreshproducts(context),
+              child: ProductsGrid(_showFavoritesOnly)),
     );
   }
 }
